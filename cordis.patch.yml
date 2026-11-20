@@ -1,0 +1,3 @@
+- insert:
+    - id: nebula-spectrum
+      name: '@local/dsh-nebula-spectrum'
