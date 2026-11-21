@@ -70,14 +70,18 @@ html[data-nebula-edition] [class*="wtg9ga_scrollFade"] {
   background: linear-gradient(to bottom, transparent, var(--nb-side-tint)) !important;
 }
 
-/* Sidebar column: tinted glass, three colour lobes and a hairline seam. */
+/* Sidebar column: tinted glass, three colour lobes and a hairline seam.
+   NO `backdrop-filter` (and no `filter`/`transform`/`contain`) may be put on
+   this column or on any of its ancestors: the host's sidebar rail toggle is
+   `position: fixed; left: 12px` on Windows and lives inside the column, so
+   such a property would become its containing block and the column's
+   `overflow: hidden` (zero-width while collapsed) would clip the button away.
+   The tint is translucent, so the aurora still reads as a diffused backdrop. */
 html[data-nebula-edition] [class$="_sidebarCol"] {
   background-color: var(--nb-side-tint) !important;
   background-image: var(--nb-side-glow) !important;
   background-repeat: no-repeat !important;
   border-right: 1px solid var(--nb-side-hairline) !important;
-  -webkit-backdrop-filter: blur(24px) saturate(160%);
-  backdrop-filter: blur(24px) saturate(160%);
 }
 /* The sidebar's own root is one of forty `_root` classes, so it is matched as
    the column's child rather than by suffix alone. */

@@ -1,6 +1,6 @@
 {
   "name": "@local/dsh-nebula-spectrum",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Nebula Spectrum — an aurora-canvas theme for the DeepSeek Harness Web UI, in eight editions: Indigo, Ember, Crimson and Neon (dark), Rainbow, Sunrise, Glacier and Rose (light).",
   "keywords": [
     "dsh",
