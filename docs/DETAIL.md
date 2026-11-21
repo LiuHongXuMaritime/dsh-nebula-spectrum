@@ -1,18 +1,26 @@
 # Nebula Spectrum theme
 
 A theme for the DeepSeek Harness Web UI, ported from the PI-Desktop plugin
-"Nebula Spectrum" (`local.nebula-spectrum` 0.6.0) so that both applications
-share one look: a deep aurora canvas, a glass sidebar, a spectrum-rimmed
-composer and a gradient send button.
+"Nebula Spectrum" (`local.nebula-spectrum` 0.9.0) so that both applications
+share one look: an aurora canvas, a glass sidebar, a spectrum-rimmed composer
+and a gradient send button.
 
 ## Editions
 
+Eight editions, four dark and four light, matching the PI plugin one for one.
+
 | Edition | Look | Built for |
 | --- | --- | --- |
-| Deep ocean | Midnight blue-green panes over an aurora of amber, rose, cyan, teal, indigo and lime | Dark appearance |
-| Onyx | The same spectrum pressed down to near-black | Dark appearance, OLED-friendly |
-| Light | Warm white panes on a pastel spectrum wash, magenta accent | Light appearance |
-| Follow appearance | Deep ocean on a dark appearance, Light on a light one | Default |
+| 光谱·青蓝 · Indigo | Midnight blue-green panes over an aurora of amber, rose, cyan, teal, indigo and lime | Dark appearance |
+| 光谱·余烬 · Ember | Warm ash and ember over a black canvas | Dark appearance |
+| 光谱·朱红 · Crimson | Red-black glass with an orange-to-magenta spectrum | Dark appearance |
+| 光谱·霓虹 · Neon | Cyan and violet neon on near-black | Dark appearance |
+| 光谱·彩虹 · Rainbow | Warm white panes on a pastel spectrum wash, magenta accent | Light appearance |
+| 光谱·暖阳 · Sunrise | Cream panes under amber and rose light | Light appearance |
+| 光谱·冰蓝 · Glacier | Cool white panes with an ice-blue accent | Light appearance |
+| 光谱·玫瑰 · Rose | Porcelain panes with a rose accent | Light appearance |
+
+"Follow appearance" picks Indigo on a dark appearance and Rainbow on a light one.
 
 Pick an edition in **Settings → General → Nebula Spectrum**. The choice is kept
 in `localStorage`, and it never rewrites the preference the built-in appearance
@@ -45,6 +53,28 @@ A rebuild of the host keeps the theme attached. If a future release renames one
 of those hooks, the palette stays intact and only that surface falls back to its
 stock look.
 
+## Syncing with a PI release
+
+The two editions the PI plugin started with (Indigo and Rainbow) are mapped by
+hand in `src/skin.css`; the other six are derived from the PI CSS by a script,
+which is what keeps a new PI palette one command away:
+
+```sh
+node scripts/sync-pi.mjs "path/to/local.nebula-spectrum-0.9.0.piplug"
+```
+
+It reads `manifest.json` for ids, bases and labels, parses each `theme/*.css`
+for its token block and its surface rules, then rewrites
+
+- `src/editions.generated.css` — one block per generated edition, and
+- `src/editions.json` — the id, both labels, the base scheme and a preview
+  swatch for every edition, curated ones included.
+
+`node build.js` then concatenates the generated blocks at the `@@GENERATED@@`
+marker and inlines both files into `client.js`. The colour scheme of each
+edition is expressed as `data-nebula-scheme` on `<html>`, so a dark edition
+forces dark native controls even when the host appearance is light.
+
 ## The window caption buttons
 
 The minimise / maximise / close buttons on Windows are drawn by Electron, not by
@@ -69,18 +99,15 @@ buttons are the browser's own and stay untouched.
 
 ## Notes
 
-- Deep ocean and Onyx are dark editions; they force the document colour scheme
-  to dark, so they look best when the built-in appearance row is also set to
-  dark. Light is meant for the light appearance. "Follow appearance" keeps the
-  two in step automatically.
-- The palette is complete enough to survive the light / dark branch of the host
-  styles, but a few host rules hard-code a hairline for one scheme. If a border
-  looks slightly off in a mixed pairing, matching the appearance row to the
-  edition is the fix.
-- The edition attribute lives on `<html>` and is removed when the plugin
-  unmounts, so disabling the plugin restores the stock appearance immediately.
+- Every edition declares whether it is dark or light, and forces the document
+  colour scheme to match, so the palette reads correctly even when the built-in
+  appearance row is set the other way. Mixed pairings can still leave a host
+  hairline slightly off; matching the row to the edition is the cosmetic fix.
+- The edition and scheme attributes live on `<html>` and are removed when the
+  plugin unmounts, so disabling the plugin restores the stock appearance
+  immediately.
 - The stylesheet is mounted into `<head>` by the plugin and removed again on
-  unmount, so disabling the plugin restores the stock appearance and the stock
-  caption buttons; nothing is written to disk and no host file is patched.
-- `build.js` produces `client.js` from `src/client.template.js` and
-  `src/skin.css`. Edit those, then run `node build.js`.
+  unmount; nothing is written to disk and no host file is patched.
+- `build.js` produces `client.js` from `src/client.template.js`, `src/skin.css`,
+  `src/editions.generated.css` and `src/editions.json`. Edit the sources, then
+  run `node build.js`.

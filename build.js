@@ -1,17 +1,27 @@
-// Builds client.js by inlining src/skin.css into src/client.template.js.
+// Builds client.js by inlining the stylesheet and the edition metadata into
+// src/client.template.js.
 //
-// The stylesheet is inserted with JSON.stringify, never by string replacement
-// of $-patterns, so the CSS cannot be mangled on the way in.
+// The CSS is inserted with JSON.stringify, never by string replacement of
+// $-patterns, so it cannot be mangled on the way in.
 //
 // Usage: node build.js
 
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
 const root = dirname(fileURLToPath(import.meta.url));
 const template = readFileSync(join(root, "src", "client.template.js"), "utf8");
-const skin = readFileSync(join(root, "src", "skin.css"), "utf8");
+
+let skin = readFileSync(join(root, "src", "skin.css"), "utf8");
+
+// The palette editions are generated from the PI plugin by scripts/sync-pi.mjs
+// and concatenated here, so a PI release is one command away from a DSH skin.
+const generatedPath = join(root, "src", "editions.generated.css");
+if (!skin.includes("/* @@GENERATED@@") || !existsSync(generatedPath)) {
+  throw new Error("build: run `node scripts/sync-pi.mjs <piplug>` to generate src/editions.generated.css");
+}
+skin = skin.replace(/\/\* @@GENERATED@@[^\n]*\n/, readFileSync(generatedPath, "utf8"));
 
 // The host applies its theme tokens as inline styles on <body>, and an inline
 // declaration outranks any normal author declaration. An `!important` author
@@ -27,17 +37,25 @@ const armedCss = skin.replace(DECLARATION, (match, lead, indent, name, value) =>
   return `${lead}${indent}${name}: ${value} !important;`;
 });
 
-const placeholder = "__SKIN_CSS__";
-const marker = `var SKIN_CSS = ${placeholder};`;
+const editionsPath = join(root, "src", "editions.json");
+if (!existsSync(editionsPath)) {
+  throw new Error("build: src/editions.json is missing (regenerate it with scripts/sync-pi.mjs)");
+}
+const editions = JSON.parse(readFileSync(editionsPath, "utf8"));
 
-if (!template.includes(marker)) {
-  throw new Error(`build: template is missing the marker ${marker}`);
+const cssMarker = `var SKIN_CSS = __SKIN_CSS__;`;
+const editionsMarker = `var EDITIONS = __EDITIONS_JSON__;`;
+
+for (const marker of [cssMarker, editionsMarker]) {
+  if (!template.includes(marker)) throw new Error(`build: template is missing the marker ${marker}`);
 }
 
-const client = template.replace(marker, `var SKIN_CSS = ${JSON.stringify(armedCss)};`);
+const client = template
+  .replace(cssMarker, `var SKIN_CSS = ${JSON.stringify(armedCss)};`)
+  .replace(editionsMarker, `var EDITIONS = ${JSON.stringify(editions)};`);
 
 writeFileSync(join(root, "client.js"), client, "utf8");
 
 console.log(
-  `build: client.js written (${client.length} bytes, ${armedCss.length} bytes of CSS, ${armed} declarations armed)`
+  `build: client.js written (${client.length} bytes, ${armedCss.length} bytes of CSS, ${editions.length} editions, ${armed} declarations armed)`
 );

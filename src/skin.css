@@ -1,8 +1,14 @@
 /* ==========================================================================
    Nebula Spectrum for DeepSeek Harness
    Ported from the PI-Desktop plugin "Nebula Spectrum" (local.nebula-spectrum
-   0.6.0): deep-ocean, onyx and light editions that keep the full spectrum at
+   0.9.0): eight editions — four dark (Indigo, Ember, Crimson, Neon) and four
+   light (Rainbow, Sunrise, Glacier, Rose) — and each keeps its own spectrum at
    the window edges.
+
+   This file holds the scaffolding plus the two editions that were mapped by
+   hand (`nebula`, `nebula-light`, the pair the PI plugin started with). The
+   other six are generated from the PI CSS by `scripts/sync-pi.mjs`,
+   concatenated at the `@@GENERATED@@` marker and listed in `editions.json`.
 
    Two rules of engagement, because the host owns its own skin:
    1. Every palette value is written as a custom-property declaration, and
@@ -18,10 +24,8 @@
 
 /* ---------- shared scaffolding ---------- */
 
-html[data-nebula-edition] { color-scheme: dark; }
-html[data-nebula-edition="light"] { color-scheme: light !important; }
-html[data-nebula-edition="nebula"],
-html[data-nebula-edition="onyx"] { color-scheme: dark !important; }
+html[data-nebula-edition] { color-scheme: dark !important; }
+html[data-nebula-edition][data-nebula-scheme="light"] { color-scheme: light !important; }
 
 /* The aurora canvas: one fixed painting behind every panel, exactly like the
    PI theme's `.app-shell` background. Panels above it are translucent. */
@@ -35,7 +39,7 @@ html[data-nebula-edition] body {
 
 /* Host classes are CSS-module names of the form `hash_readable`: the hash moves
    on a rebuild, the readable half does not. Each surface therefore gets two
-   anchors — the exact class this build uses, and a hash-free fallback kept
+   anchors 鈥?the exact class this build uses, and a hash-free fallback kept
    narrow, because several suffixes are not unique in the host (`_frame` is
    shared by nine panels, `_card` by forty, `_primary` by six). */
 
@@ -397,235 +401,12 @@ html[data-nebula-edition="nebula"] body {
   --dsw-specific-file-upload-track: rgba(56, 189, 248, 0.14);
 }
 
-/* ---------- edition: onyx (near-black) ----------
-   The same spectrum, pressed down to black: lobes drop to a whisper and every
-   pane is a shade of ink. */
 
-html[data-nebula-edition="onyx"] body {
-  --nb-canvas: #000000;
-  --nb-aurora:
-    radial-gradient(1200px 680px at 4% -12%, rgba(251, 146, 60, 0.24), transparent 64%),
-    radial-gradient(980px 560px at 98% -8%, rgba(236, 72, 153, 0.24), transparent 66%),
-    radial-gradient(900px 600px at 88% 112%, rgba(34, 211, 238, 0.26), transparent 68%),
-    radial-gradient(760px 460px at 10% 114%, rgba(45, 212, 191, 0.20), transparent 70%),
-    radial-gradient(1000px 620px at 48% 46%, rgba(99, 102, 241, 0.16), transparent 72%),
-    radial-gradient(700px 420px at 62% 106%, rgba(163, 230, 53, 0.10), transparent 74%);
-  --nb-side-tint: rgba(3, 6, 9, 0.70);
-  --nb-side-glow:
-    radial-gradient(460px 300px at 0% 0%, rgba(236, 72, 153, 0.22), transparent 66%),
-    radial-gradient(420px 300px at 100% 46%, rgba(251, 191, 36, 0.15), transparent 70%),
-    radial-gradient(440px 340px at 60% 104%, rgba(45, 212, 191, 0.20), transparent 70%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 240px);
-  --nb-side-hairline: rgba(236, 72, 153, 0.14);
-  --nb-titlebar: #04080c;
-  --nb-titlebar-line: rgba(148, 190, 210, 0.10);
-  --nb-sheet: #04070b;
-  --nb-sheet-wash:
-    radial-gradient(1100px 340px at 50% -18%, rgba(251, 146, 60, 0.10), transparent 70%),
-    radial-gradient(820px 300px at 100% -10%, rgba(236, 72, 153, 0.09), transparent 72%),
-    radial-gradient(820px 300px at 0% -10%, rgba(59, 130, 246, 0.09), transparent 72%),
-    radial-gradient(900px 320px at 82% 112%, rgba(45, 212, 191, 0.08), transparent 74%);
-  --nb-card-fill: linear-gradient(152deg, rgba(10, 17, 22, 0.96), rgba(3, 7, 10, 0.98));
-  --nb-card-rim: linear-gradient(135deg, rgba(245, 158, 11, 0.80), rgba(244, 63, 94, 0.75) 24%, rgba(219, 39, 119, 0.75) 44%, rgba(99, 102, 241, 0.70) 66%, rgba(6, 182, 212, 0.85));
-  --nb-card-fill-focus: linear-gradient(152deg, rgba(13, 22, 28, 0.97), rgba(4, 9, 12, 0.98));
-  --nb-card-rim-focus: linear-gradient(135deg, rgba(217, 119, 6, 0.95), rgba(225, 29, 72, 0.90) 24%, rgba(219, 39, 119, 0.90) 44%, rgba(79, 70, 229, 0.90) 66%, rgba(8, 145, 178, 0.95));
-  --nb-card-shadow: 0 12px 34px rgba(0, 0, 0, 0.70), 0 0 26px rgba(6, 182, 212, 0.16);
-  --nb-card-shadow-focus: 0 14px 40px rgba(0, 0, 0, 0.75), 0 0 34px rgba(6, 182, 212, 0.28), 0 0 22px rgba(236, 72, 153, 0.20);
-  --nb-send: linear-gradient(135deg, #fbbf24, #fb7185 36%, #f472b6 58%, #60a5fa 80%, #67e8f9);
-  --nb-send-ink: #04070b;
-  --nb-send-shadow: 0 2px 10px rgba(236, 72, 153, 0.35);
-  --nb-send-shadow-hover: 0 3px 16px rgba(236, 72, 153, 0.45), 0 0 18px rgba(6, 182, 212, 0.30);
-  --nb-bubble: #0b1218;
-  --nb-bubble-ink: #e9f4f8;
-  --nb-bubble-shadow: inset 0 0 0 1px rgba(148, 190, 210, 0.14), 0 2px 8px rgba(0, 0, 0, 0.60);
-  --nb-code-bg: #080d11;
-  --nb-code-shadow: inset 0 0 0 1px rgba(148, 190, 210, 0.12), 0 1px 2px rgba(0, 0, 0, 0.55);
-  --nb-code-band: linear-gradient(90deg, rgba(251, 146, 60, 0.16), rgba(236, 72, 153, 0.14) 34%, rgba(99, 102, 241, 0.12) 66%, rgba(45, 212, 191, 0.12));
-  --nb-edge: linear-gradient(90deg, #f59e0b, #f43f5e 20%, #ec4899 40%, #6366f1 60%, #06b6d4 80%, #10b981);
-  --nb-edge-opacity: 0.75;
-  --nb-select-bg: rgba(34, 211, 238, 0.34);
-  --nb-select-ink: #f2fafd;
-
-  --dsw-static-neutral-bluish-00: #f2fafd;
-  --dsw-static-neutral-bluish-50: #e6f2f6;
-  --dsw-static-neutral-bluish-55: #dfeef3;
-  --dsw-static-neutral-bluish-60: #d8e7ec;
-  --dsw-static-neutral-bluish-75: #cddfe5;
-  --dsw-static-neutral-bluish-90: #c3d6dc;
-  --dsw-static-neutral-bluish-100: #b6cbd2;
-  --dsw-static-neutral-bluish-150: #a2bac3;
-  --dsw-static-neutral-bluish-200: #94adb7;
-  --dsw-static-neutral-bluish-300: #7f949d;
-  --dsw-static-neutral-bluish-310: #778c95;
-  --dsw-static-neutral-bluish-400: #5d6f77;
-  --dsw-static-neutral-bluish-500: #46545c;
-  --dsw-static-neutral-bluish-600: #2d383e;
-  --dsw-static-neutral-bluish-700: #202a30;
-  --dsw-static-neutral-bluish-750: #172026;
-  --dsw-static-neutral-bluish-800: #101820;
-  --dsw-static-neutral-bluish-850: #0b1218;
-  --dsw-static-neutral-bluish-875: #0a1117;
-  --dsw-static-neutral-bluish-900: #080e13;
-  --dsw-static-neutral-bluish-950: #04080c;
-  --dsw-static-neutral-bluish-1000: #030608;
-
-  --dsw-static-neutral-00: #f2fafd;
-  --dsw-static-neutral-50: #e9f4f8;
-  --dsw-static-neutral-100: #c3d6dc;
-  --dsw-static-neutral-150: #a2bac3;
-  --dsw-static-neutral-200: #94adb7;
-  --dsw-static-neutral-250: #869fa9;
-  --dsw-static-neutral-300: #7f949d;
-  --dsw-static-neutral-400: #5d6f77;
-  --dsw-static-neutral-500: #46545c;
-  --dsw-static-neutral-550: #39464d;
-  --dsw-static-neutral-600: #2d383e;
-  --dsw-static-neutral-700: #202a30;
-  --dsw-static-neutral-800: #101820;
-  --dsw-static-neutral-850: #0b1218;
-  --dsw-static-neutral-900: #080e13;
-  --dsw-static-neutral-1000: #030608;
-
-  --dsw-static-deepseek-50: #eafcff;
-  --dsw-static-deepseek-100: #ccf5fb;
-  --dsw-static-deepseek-200: #9beaf5;
-  --dsw-static-deepseek-300: #6fdcf0;
-  --dsw-static-deepseek-400: #67e8f9;
-  --dsw-static-deepseek-450: #22d3ee;
-  --dsw-static-deepseek-500: #22d3ee;
-  --dsw-static-deepseek-600: #06b6d4;
-  --dsw-static-deepseek-800: #0a2730;
-  --dsw-static-deepseek-900: #0a2730;
-  --dsw-static-blue-50: #eaf4ff;
-  --dsw-static-blue-75: #d6ecff;
-  --dsw-static-blue-100: #c2e3fc;
-  --dsw-static-blue-300: #7dd3fc;
-  --dsw-static-blue-400: #38bdf8;
-  --dsw-static-blue-450: #38bdf8;
-  --dsw-static-blue-500: #38bdf8;
-  --dsw-static-blue-600: #0ea5e9;
-  --dsw-static-blue-800: #06304a;
-  --dsw-static-blue-900: #052738;
-  --dsw-static-blue-950: #031a26;
-  --dsw-static-green-100: #c8f5e0;
-  --dsw-static-green-400: #34d399;
-  --dsw-static-green-500: #34d399;
-  --dsw-static-green-900: #053b2b;
-  --dsw-static-amber-100: #fdf0c9;
-  --dsw-static-amber-400: #fbbf24;
-  --dsw-static-amber-500: #fbbf24;
-  --dsw-static-amber-600: #f59e0b;
-  --dsw-static-amber-900: #3d2404;
-  --dsw-static-red-50: #ffeff1;
-  --dsw-static-red-100: #ffdfe3;
-  --dsw-static-red-400: #fb7185;
-  --dsw-static-red-500: #f43f5e;
-  --dsw-static-red-600: #e11d48;
-  --dsw-static-red-900: #40040f;
-  --dsw-static-violet-400: #2dd4bf;
-  --dsw-static-violet-600: #14b8a6;
-
-  --dsw-alias-bg-base: #04070b;
-  --dsw-alias-bg-layer-1: #070c11;
-  --dsw-alias-bg-layer-2: #0b1218;
-  --dsw-alias-bg-layer-3: #101820;
-  --dsw-alias-bg-overlay: rgba(7, 12, 17, 0.95);
-  --dsw-alias-bg-module-platform: rgba(34, 211, 238, 0.14);
-  --dsw-alias-bg-skeleton: rgba(148, 190, 210, 0.05);
-  --dsw-alias-bg-multi-select: rgba(34, 211, 238, 0.09);
-  --dsw-alias-border-l1: rgba(148, 190, 210, 0.09);
-  --dsw-alias-border-l2: rgba(148, 190, 210, 0.14);
-  --dsw-alias-border-l3: rgba(148, 190, 210, 0.18);
-  --dsw-alias-border-l4: rgba(148, 190, 210, 0.22);
-  --dsw-alias-border-selected: #22d3ee;
-  --dsw-alias-card-fill: rgba(148, 190, 210, 0.05);
-  --dsw-alias-card-fill-hover: rgba(148, 190, 210, 0.09);
-  --dsw-alias-card-tile-fill: rgba(148, 190, 210, 0.05);
-  --dsw-alias-hovercard-bg: #0d151c;
-
-  --dsw-alias-label-primary: #e9f4f8;
-  --dsw-alias-label-primary-bluish: #e9f4f8;
-  --dsw-alias-label-secondary: rgba(206, 226, 234, 0.74);
-  --dsw-alias-label-tertiary: rgba(176, 200, 210, 0.54);
-  --dsw-alias-label-caption: rgba(176, 200, 210, 0.54);
-  --dsw-alias-label-dimmed: rgba(158, 184, 196, 0.40);
-  --dsw-alias-label-primary-dimmed: #7f949d;
-  --dsw-alias-brand-primary: #22d3ee;
-  --dsw-alias-brand-text: #22d3ee;
-  --dsw-alias-link: #38bdf8;
-
-  --dsw-alias-state-success-primary: #34d399;
-  --dsw-alias-state-success-secondary: rgba(52, 211, 153, 0.16);
-  --dsw-alias-state-success-tertiary: rgba(52, 211, 153, 0.09);
-  --dsw-alias-state-warn-primary: #fbbf24;
-  --dsw-alias-state-warn-secondary: rgba(251, 191, 36, 0.16);
-  --dsw-alias-state-warn-tertiary: rgba(251, 191, 36, 0.09);
-  --dsw-alias-state-warn-label: #fbbf24;
-  --dsw-alias-state-error-primary: #fb7185;
-  --dsw-alias-state-error-secondary: rgba(251, 113, 133, 0.16);
-  --dsw-alias-state-idle-primary: #46545c;
-  --dsw-alias-state-done-primary: #2dd4bf;
-  --dsw-alias-state-business-primary: #22d3ee;
-  --dsw-alias-state-business-tertiary: rgba(34, 211, 238, 0.14);
-
-  --dsw-alias-button-info-fill: #22d3ee;
-  --dsw-alias-button-info-hover: #67e8f9;
-  --dsw-alias-button-primary-fill: #22d3ee;
-  --dsw-alias-button-primary-hover: #67e8f9;
-  --dsw-alias-button-elevated-fill: #0d151c;
-  --dsw-alias-button-floating-fill: rgba(10, 16, 22, 0.88);
-  --dsw-alias-button-floating-hover: rgba(13, 21, 28, 0.94);
-  --dsw-alias-interactive-bg-hover: rgba(148, 190, 210, 0.08);
-  --dsw-alias-interactive-bg-active: rgba(148, 190, 210, 0.14);
-  --dsw-alias-interactive-bg-hover-solid: #0d151c;
-  --dsw-alias-switch-thumb: #7f949d;
-  --dsw-alias-scrollbar-bg-l1: rgba(148, 190, 210, 0.12);
-  --dsw-alias-scrollbar-bg-l2: #2d383e;
-  --dsw-alias-scrollbar-hover-l1: rgba(148, 190, 210, 0.20);
-  --dsw-alias-scrollbar-hover-l2: #46545c;
-
-  --dsw-alias-markdown-code-block: #080d11;
-  --dsw-alias-markdown-code-block-banner: rgba(148, 190, 210, 0.07);
-  --dsw-alias-markdown-inline-code: rgba(148, 190, 210, 0.09);
-  --dsw-alias-markdown-tag: rgba(148, 190, 210, 0.12);
-  --dsw-alias-markdown-citation: #7f949d;
-  --dsw-alias-markdown-placeholder: #2d383e;
-  --dsw-alias-markdown-code-segment-selected: #0d151c;
-  --dsw-alias-markdown-code-segment-unselected: #080d11;
-
-  --dsw-alias-tooltip-bg: #0d151c;
-  --dsw-alias-tooltip-label: #e9f4f8;
-  --dsw-alias-toast-bg: #0d151c;
-  --dsw-alias-toast-label: #e9f4f8;
-  --dsw-alias-trajectory-accent: #38bdf8;
-  --dsw-alias-turn-trigger-bg: rgba(148, 190, 210, 0.045);
-  --dsw-alias-turn-trigger-bg-hover: rgba(148, 190, 210, 0.09);
-  --dsw-alias-menu-group-header-fill: rgba(148, 190, 210, 0.07);
-  --dsw-alias-menu-icon: #7f949d;
-  --dsw-alias-code-diff-added: rgba(52, 211, 153, 0.14);
-  --dsw-alias-code-diff-deleted: rgba(251, 113, 133, 0.14);
-  --dsw-alias-chart-messages: #22d3ee;
-  --dsw-alias-chart-system: #7f949d;
-  --dsw-alias-chart-tools: #2dd4bf;
-
-  --dsw-specific-sidebar-fill: #04080c;
-  --dsw-specific-sidebar-nav-item-active: rgba(34, 211, 238, 0.14);
-  --dsw-specific-sidebar-nav-item-active-accent: #22d3ee;
-  --dsw-specific-bubble: #0b1218;
-  --dsw-specific-bubble-highlight: #0d151c;
-  --dsw-specific-input-major: rgba(6, 11, 15, 0.94);
-  --dsw-specific-menu: rgba(4, 8, 12, 0.94);
-  --dsw-menu-surface-fill: rgba(4, 8, 12, 0.94);
-  --dsw-specific-selector: rgba(10, 16, 22, 0.92);
-  --dsw-specific-tip: rgba(10, 16, 22, 0.92);
-  --dsw-specific-file-upload-track: rgba(148, 190, 210, 0.14);
-}
-
-/* ---------- edition: light ----------
+/* ---------- edition: nebula-light (rainbow, light) ----------
    Warm white panes on a pastel spectrum wash. The composer keeps its spectrum
    rim, so the light edition still reads as the same family. */
 
-html[data-nebula-edition="light"] body {
+html[data-nebula-edition="nebula-light"] body {
   --nb-canvas: #fcfbfd;
   --nb-aurora:
     linear-gradient(118deg, rgba(255, 186, 120, 0.26), rgba(255, 133, 192, 0.24) 28%, rgba(139, 176, 255, 0.20) 55%, rgba(125, 235, 220, 0.22) 80%, rgba(186, 246, 160, 0.20)),
@@ -845,3 +626,5 @@ html[data-nebula-edition="light"] body {
   --dsw-specific-file-upload-track: rgba(30, 32, 50, 0.12);
 }
 
+
+/* @@GENERATED@@ — editions emitted by scripts/sync-pi.mjs are concatenated here. */

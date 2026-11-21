@@ -1,7 +1,7 @@
 {
   "name": "@local/dsh-nebula-spectrum",
-  "version": "0.1.0",
-  "description": "Nebula Spectrum — an aurora-canvas theme for the DeepSeek Harness Web UI, in deep-ocean, onyx and light editions.",
+  "version": "0.2.0",
+  "description": "Nebula Spectrum — an aurora-canvas theme for the DeepSeek Harness Web UI, in eight editions: Indigo, Ember, Crimson and Neon (dark), Rainbow, Sunrise, Glacier and Rose (light).",
   "keywords": [
     "dsh",
     "dsh-plugin",
@@ -25,7 +25,8 @@
   "scripts": {
     "build": "node build.js",
     "verify": "node verify.js",
-    "icon": "node scripts/make-icon.mjs"
+    "icon": "node scripts/make-icon.mjs",
+    "sync": "node scripts/sync-pi.mjs"
   },
   "exports": {
     ".": "./index.js",

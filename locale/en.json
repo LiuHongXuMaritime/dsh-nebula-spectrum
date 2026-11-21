@@ -1,7 +1,7 @@
 {
   "meta": {
     "title": "Nebula Spectrum theme",
-    "description": "Paints the Web UI with the Nebula Spectrum palette: an aurora canvas, a glass sidebar, a spectrum-rimmed composer and gradient send button, in deep-ocean, onyx and light editions.",
+    "description": "Paints the Web UI with the Nebula Spectrum palette: an aurora canvas, a glass sidebar, a spectrum-rimmed composer and gradient send button, in eight editions — Indigo, Ember, Crimson and Neon (dark), Rainbow, Sunrise, Glacier and Rose (light).",
     "detail": "docs/DETAIL.md"
   }
 }

@@ -10,62 +10,64 @@ window.__ModuleLoader__.load({
 
     var NS = "nebula-spectrum";
     var SKIN_CSS = __SKIN_CSS__;
+    var EDITIONS = __EDITIONS_JSON__;
     var STORAGE_KEY = "dsh.nebula-spectrum.v1";
-    var EDITIONS = ["auto", "nebula", "onyx", "light"];
     var EDITION_ATTR = "data-nebula-edition";
+    var SCHEME_ATTR = "data-nebula-scheme";
+
+    var BY_ID = {};
+    for (var i = 0; i < EDITIONS.length; i += 1) BY_ID[EDITIONS[i].id] = EDITIONS[i];
+
+    var AUTO = "auto";
+    var DEFAULT_DARK = "nebula";
+    var DEFAULT_LIGHT = "nebula-light";
 
     /* ---------- dictionaries ---------- */
 
     var en = {
       title: "Nebula Spectrum",
-      hint: "An aurora canvas, a glass sidebar and a spectrum-rimmed composer.",
-      nebula: "Deep ocean",
-      onyx: "Onyx",
-      light: "Light",
+      hint: "An aurora canvas, a glass sidebar and a spectrum-rimmed composer. Each edition keeps its own palette at the window edges.",
       auto: "Follow appearance",
-      autoHint: "The dark appearance uses Deep ocean.",
+      autoHint: "Pick an edition from the host's light or dark appearance.",
+      darkGroup: "Dark editions",
+      lightGroup: "Light editions",
     };
 
     var zh = {
       title: "星云光谱",
-      hint: "极光画布、玻璃侧边栏与光谱描边的输入框。",
-      nebula: "深海",
-      onyx: "玄黑",
-      light: "浅色",
+      hint: "极光画布、玻璃侧边栏与光谱描边的输入框。每套版本都保留自己的配色与窗口边缘的光谱。",
       auto: "跟随外观",
-      autoHint: "深色外观使用深海版本。",
+      autoHint: "跟随宿主界面的浅色 / 深色外观自动选择版本。",
+      darkGroup: "深色版本",
+      lightGroup: "浅色版本",
     };
+
+    for (var e = 0; e < EDITIONS.length; e += 1) {
+      en[EDITIONS[e].id] = EDITIONS[e].en;
+      zh[EDITIONS[e].id] = EDITIONS[e].zh;
+    }
 
     /* ---------- the edition store ----------
        A preference this plugin owns. It never registers a DSH theme, because
        only the light / dark / system preferences persist through the host and
        only those three appear in the built-in appearance row. */
 
-    var SWATCH = {
-      nebula:
-        "radial-gradient(circle at 22% 18%, #fb923c, transparent 55%)," +
-        "radial-gradient(circle at 84% 10%, #ec4899, transparent 55%)," +
-        "radial-gradient(circle at 76% 92%, #22d3ee, transparent 58%)," +
-        "radial-gradient(circle at 16% 86%, #2dd4bf, transparent 55%),#0a171f",
-      onyx:
-        "radial-gradient(circle at 22% 18%, #c2711f, transparent 52%)," +
-        "radial-gradient(circle at 84% 10%, #a8285c, transparent 52%)," +
-        "radial-gradient(circle at 76% 92%, #128fa0, transparent 55%)," +
-        "radial-gradient(circle at 16% 86%, #1d8f84, transparent 52%),#04070b",
-      light:
-        "linear-gradient(118deg, #ffd9b8, #ffc7de 40%, #cfe0ff 70%, #c6f2ea),#fcfbfd",
-      auto: "linear-gradient(90deg, #0a171f 0 50%, #fcfbfd 50% 100%)",
-    };
+    /* Editions that older releases named differently, so a stored choice keeps
+       working across the upgrade (0.1.x had `light` and a now-retired `onyx`). */
+    var MIGRATION = { light: "nebula-light", onyx: "nebula" };
+
+    var AUTO_SWATCH = "linear-gradient(90deg, #0a171f 0 50%, #fcfbfd 50% 100%)";
 
     function readEdition() {
       try {
         var raw = window.localStorage.getItem(STORAGE_KEY);
-        if (!raw) return "auto";
+        if (!raw) return AUTO;
         var parsed = JSON.parse(raw);
         var edition = parsed && parsed.edition;
-        return EDITIONS.indexOf(edition) === -1 ? "auto" : edition;
+        if (MIGRATION[edition]) return MIGRATION[edition];
+        return BY_ID[edition] ? edition : AUTO;
       } catch (error) {
-        return "auto";
+        return AUTO;
       }
     }
 
@@ -94,15 +96,22 @@ window.__ModuleLoader__.load({
     }
 
     function resolvedEdition() {
-      if (store.edition !== "auto") return store.edition;
-      return store.scheme === "light" ? "light" : "nebula";
+      if (store.edition !== AUTO && BY_ID[store.edition]) return store.edition;
+      return store.scheme === "light" ? DEFAULT_LIGHT : DEFAULT_DARK;
     }
 
     function applyEdition() {
       var root = document.documentElement;
       var edition = resolvedEdition();
+      var meta = BY_ID[edition] || BY_ID[DEFAULT_DARK];
       if (root.getAttribute(EDITION_ATTR) !== edition) {
         root.setAttribute(EDITION_ATTR, edition);
+      }
+      /* `color-scheme` is keyed off this attribute in the scaffolding, so that
+         a dark edition forces dark native controls even when the host's own
+         appearance is light (and the other way round). */
+      if (root.getAttribute(SCHEME_ATTR) !== meta.base) {
+        root.setAttribute(SCHEME_ATTR, meta.base);
       }
       nudgeCaption(edition);
     }
@@ -134,7 +143,7 @@ window.__ModuleLoader__.load({
     }
 
     function chooseEdition(edition) {
-      if (EDITIONS.indexOf(edition) === -1) return;
+      if (edition !== AUTO && !BY_ID[edition]) return;
       store.edition = edition;
       writeEdition(edition);
       applyEdition();
@@ -158,56 +167,100 @@ window.__ModuleLoader__.load({
       return store;
     }
 
+    function editionsOfGroup(group) {
+      return EDITIONS.filter(function (edition) {
+        return edition.group === group;
+      });
+    }
+
     /* ---------- the edition picker ---------- */
 
     var ROW_CSS =
       ".nbx-group{display:flex;flex-direction:column;gap:8px;padding:16px 0;border-bottom:.5px solid var(--dsw-alias-border-l2)}" +
       ".nbx-title{color:var(--dsw-alias-label-primary);font-size:14px;font-weight:400;line-height:22px}" +
       ".nbx-hint{color:var(--dsw-alias-label-tertiary);font-size:12px;line-height:18px}" +
+      ".nbx-sub{color:var(--dsw-alias-label-caption);font-size:12px;line-height:18px;margin-top:2px}" +
       ".nbx-row{display:flex;flex-wrap:wrap;align-items:stretch;gap:8px}" +
-      ".nbx-cube{box-sizing:border-box;flex:1 1 132px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:14px 10px;border:.5px solid var(--dsw-alias-border-l4);border-radius:var(--dsw-radius-xl);background:0 0;color:var(--dsw-alias-label-primary);font:inherit;font-size:13px;line-height:20px;cursor:pointer;transition:background-color .16s ease,border-color .16s ease}" +
+      ".nbx-cube{box-sizing:border-box;flex:1 1 116px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:12px 8px;border:.5px solid var(--dsw-alias-border-l4);border-radius:var(--dsw-radius-xl);background:0 0;color:var(--dsw-alias-label-primary);font:inherit;font-size:13px;line-height:20px;cursor:pointer;transition:background-color .16s ease,border-color .16s ease}" +
       ".nbx-cube:hover{background:var(--dsw-alias-interactive-bg-hover)}" +
       ".nbx-cube[aria-pressed=true]{border-color:var(--dsw-alias-border-selected);background:var(--dsw-alias-bg-module-platform)}" +
+      ".nbx-cube--auto{flex:1 1 100%}" +
       ".nbx-dot{width:34px;height:34px;border-radius:999px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.18),0 1px 2px rgba(0,0,0,.18)}";
+
+    function cube(t, edition, pressed) {
+      var id = edition ? edition.id : AUTO;
+      var swatch = edition ? edition.swatch : AUTO_SWATCH;
+      var label = edition ? editionLabel(t, edition) : t("auto");
+      return h(
+        "button",
+        {
+          key: id,
+          type: "button",
+          className: "nbx-cube" + (edition ? "" : " nbx-cube--auto"),
+          "aria-pressed": pressed ? "true" : "false",
+          title: edition ? t(id) : t("autoHint"),
+          onClick: function () {
+            chooseEdition(id);
+          },
+        },
+        h("span", {
+          key: "dot",
+          className: "nbx-dot",
+          style: { backgroundImage: swatch },
+        }),
+        h("span", { key: "label" }, label)
+      );
+    }
+
+    /* The PI plugin labels the editions `光谱·青蓝` in Chinese and `Indigo` in
+       English; the active locale decides which of the two is shown. */
+    function editionLabel(t, edition) {
+      var label = t(edition.id);
+      return label && label !== edition.id ? label : edition.en;
+    }
 
     function EditionRow(props) {
       var t = props.t;
       var state = useStore();
       var edition = state.edition;
+      var dark = editionsOfGroup("dark");
+      var light = editionsOfGroup("light");
 
-      return h(
-        "div",
-        { className: "nbx-group" },
+      var children = [
         h("style", { key: "css", dangerouslySetInnerHTML: { __html: ROW_CSS } }),
         h("div", { className: "nbx-title", key: "title" }, t("title")),
-        h(
-          "div",
-          { className: "nbx-row", key: "row" },
-          EDITIONS.map(function (id) {
-            var pressed = edition === id;
-            return h(
-              "button",
-              {
-                key: id,
-                type: "button",
-                className: "nbx-cube",
-                "aria-pressed": pressed ? "true" : "false",
-                title: id === "auto" ? t("autoHint") : t(id),
-                onClick: function () {
-                  chooseEdition(id);
-                },
-              },
-              h("span", {
-                key: "dot",
-                className: "nbx-dot",
-                style: { backgroundImage: SWATCH[id] },
-              }),
-              h("span", { key: "label" }, t(id))
-            );
-          })
-        ),
-        h("div", { className: "nbx-hint", key: "hint" }, t("hint"))
-      );
+        h("div", { className: "nbx-row", key: "auto" }, cube(t, null, edition === AUTO)),
+      ];
+
+      if (dark.length) {
+        children.push(h("div", { className: "nbx-sub", key: "dark-sub" }, t("darkGroup")));
+        children.push(
+          h(
+            "div",
+            { className: "nbx-row", key: "dark" },
+            dark.map(function (entry) {
+              return cube(t, entry, edition === entry.id);
+            })
+          )
+        );
+      }
+
+      if (light.length) {
+        children.push(h("div", { className: "nbx-sub", key: "light-sub" }, t("lightGroup")));
+        children.push(
+          h(
+            "div",
+            { className: "nbx-row", key: "light" },
+            light.map(function (entry) {
+              return cube(t, entry, edition === entry.id);
+            })
+          )
+        );
+      }
+
+      children.push(h("div", { className: "nbx-hint", key: "hint" }, t("hint")));
+
+      return h("div", { className: "nbx-group" }, children);
     }
 
     /* ---------- the skin layer ---------- */
@@ -265,6 +318,7 @@ window.__ModuleLoader__.load({
             if (typeof dispose === "function") dispose();
             if (typeof disposeSkin === "function") disposeSkin();
             document.documentElement.removeAttribute(EDITION_ATTR);
+            document.documentElement.removeAttribute(SCHEME_ATTR);
           };
         }, "nebula-spectrum: edition");
 

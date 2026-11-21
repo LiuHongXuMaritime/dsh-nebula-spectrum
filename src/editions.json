@@ -1,0 +1,74 @@
+[
+  {
+    "id": "nebula",
+    "zh": "光谱·青蓝",
+    "en": "Indigo",
+    "base": "dark",
+    "group": "dark",
+    "curated": true,
+    "swatch": "linear-gradient(135deg, #071320, #105668 58%, #22d3ee)"
+  },
+  {
+    "id": "nebula-light",
+    "zh": "光谱·彩虹",
+    "en": "Rainbow",
+    "base": "light",
+    "group": "light",
+    "curated": true,
+    "swatch": "linear-gradient(135deg, #fcfbfd, #e6acc5 58%, #be185d)"
+  },
+  {
+    "id": "nebula-sunrise",
+    "zh": "光谱·暖阳",
+    "en": "Sunrise",
+    "base": "light",
+    "group": "light",
+    "curated": false,
+    "swatch": "linear-gradient(135deg, #fffaf3, #e5c0a1 58%, #b45309)"
+  },
+  {
+    "id": "nebula-glacier",
+    "zh": "光谱·冰蓝",
+    "en": "Glacier",
+    "base": "light",
+    "group": "light",
+    "curated": false,
+    "swatch": "linear-gradient(135deg, #f8fbff, #a2c8de 58%, #0369a1)"
+  },
+  {
+    "id": "nebula-rose",
+    "zh": "光谱·玫瑰",
+    "en": "Rose",
+    "base": "light",
+    "group": "light",
+    "curated": false,
+    "swatch": "linear-gradient(135deg, #fffafc, #e8abc4 58%, #be185d)"
+  },
+  {
+    "id": "nebula-ember",
+    "zh": "光谱·余烬",
+    "en": "Ember",
+    "base": "dark",
+    "group": "dark",
+    "curated": false,
+    "swatch": "linear-gradient(135deg, #0a0605, #5e3718 58%, #fb923c)"
+  },
+  {
+    "id": "nebula-crimson",
+    "zh": "光谱·朱红",
+    "en": "Crimson",
+    "base": "dark",
+    "group": "dark",
+    "curated": false,
+    "swatch": "linear-gradient(135deg, #000000, #541818 58%, #ef4444)"
+  },
+  {
+    "id": "nebula-neon",
+    "zh": "光谱·霓虹",
+    "en": "Neon",
+    "base": "dark",
+    "group": "dark",
+    "curated": false,
+    "swatch": "linear-gradient(135deg, #000000, #0c4a53 58%, #22d3ee)"
+  }
+]
